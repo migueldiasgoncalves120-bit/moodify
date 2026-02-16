@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import sqlite3
 from moodify_v2 import gerar_musicas
+import os
+PORT = int(os.environ.get('PORT', 5000))
+app.run(host='0.0.0.0', port=PORT)
 
 app = Flask(__name__)
 
