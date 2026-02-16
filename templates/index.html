@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moodify</title>
+</head>
+<body>
+    <h1>🎧 Moodify Web</h1>
+
+    <form method="POST">
+        <input type="text" name="mood" placeholder="Descreva sua vibe..." required>
+        <button type="submit">Gerar músicas</button>
+    </form>
+
+    <ul>
+        {% for musica in musicas %}
+            <li>{{ musica }}</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
