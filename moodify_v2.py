@@ -1,81 +1,69 @@
+import random
 from ytmusicapi import YTMusic
 
-yt = YTMusic()
+ytmusic = YTMusic()
 
-print("🎧 Moodify v2 - Inteligência de Humor Musical\n")
+def gerar_musicas(mood):
 
-entrada = input("Descreva que tipo de música você quer hoje:\n> ").lower()
+    mood = mood.lower()
 
-# Categorias
-emocoes = {
-    "triste": "sad",
-    "feliz": "happy",
-    "melancolico": "melancholic",
-    "apaixonado": "romantic",
-    "raiva": "angry",
-    "nostalgia": "nostalgic"
-}
+    consultas = {
+        "indie": [
+            "indie rock 2010s",
+            "indie alternative english",
+            "indie pop international"
+        ],
+        "calma": [
+            "lofi chill beats",
+            "acoustic chill songs",
+            "soft indie playlist"
+        ],
+        "triste": [
+            "sad indie songs",
+            "melancholic acoustic",
+            "sad alternative 2015"
+        ],
+        "feliz": [
+            "happy pop hits",
+            "feel good indie",
+            "dance pop 2020"
+        ],
+        "energia": [
+            "rock hype songs",
+            "trap energy 2022",
+            "hip hop workout"
+        ],
+    }
 
-energias = {
-    "calma": "calm",
-    "suave": "soft",
-    "animada": "upbeat",
-    "pesada": "heavy",
-    "intensa": "intense",
-    "relaxante": "relax"
-}
+    # Se o mood existir no dicionário
+    if mood in consultas:
+        busca = random.choice(consultas[mood])
+    else:
+        # se o usuário digitar algo aleatório
+        busca = mood + " music playlist"
 
-generos = {
-    "pop": "pop",
-    "rock": "rock",
-    "funk": "funk",
-    "eletronica": "electronic",
-    "eletrônica": "electronic",
-    "trap": "trap",
-    "rap": "rap",
-    "lofi": "lofi",
-    "sertanejo": "sertanejo"
-}
+    resultados = ytmusic.search(busca, filter="songs", limit=40)
 
-busca_final = []
+    random.shuffle(resultados)
 
-# Detectar palavras
-for palavra in emocoes:
-    if palavra in entrada:
-        busca_final.append(emocoes[palavra])
+    musicas = []
+    titulos_vistos = set()
 
-for palavra in energias:
-    if palavra in entrada:
-        busca_final.append(energias[palavra])
+    for musica in resultados:
+        titulo = musica["title"]
+        artista = musica["artists"][0]["name"]
 
-for palavra in generos:
-    if palavra in entrada:
-        busca_final.append(generos[palavra])
+        # filtro simples anti-coisa-aleatória
+        if len(titulo) < 60 and titulo not in titulos_vistos:
+            titulos_vistos.add(titulo)
 
-# Se não detectar nada
-if not busca_final:
-    busca_final = ["top hits"]
+            musicas.append({
+                "titulo": titulo,
+                "artista": artista,
+                "capa": musica["thumbnails"][-1]["url"]
+            })
 
-# Montar busca
-query = " ".join(busca_final)
+        if len(musicas) >= 15:
+            break
 
-print(f"\n🔎 Buscando por: {query}\n")
-
-resultados = yt.search(query, filter="songs")
-
-musicas = []
-
-for item in resultados[:50]:
-    titulo = item.get("title")
-    artistas = item.get("artists")
-    artista = artistas[0]["name"] if artistas else ""
-    musicas.append(f"{titulo} – {artista}")
-
-musicas = list(dict.fromkeys(musicas))[:30]
-
-print("🔥 Aqui estão 30 músicas para sua vibe:\n")
-
-for i, m in enumerate(musicas, 1):
-    print(f"{i}. {m}")
-
-print("\n🎶 Moodify entregou sua energia do dia.")
+    return musicas

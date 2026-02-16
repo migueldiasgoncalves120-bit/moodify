@@ -1,21 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
     <title>Moodify</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #121212);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 40px;
+            font-size: 40px;
+        }
+
+        .search-box {
+            margin: 30px 0;
+        }
+
+        input {
+            padding: 12px;
+            width: 280px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+        }
+
+        button {
+            padding: 12px 18px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            margin-left: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .buscar-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .like {
+            margin-top: 10px;
+            background: #ff4081;
+            color: white;
+            width: 100%;
+        }
+
+        #resultados {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.08);
+            padding: 15px;
+            margin: 12px;
+            border-radius: 20px;
+            width: 220px;
+            transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.12);
+        }
+
+        img {
+            width: 100%;
+            border-radius: 15px;
+        }
+
+        .loading {
+            font-size: 18px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>🎧 Moodify Web</h1>
 
-    <form method="POST">
-        <input type="text" name="mood" placeholder="Descreva sua vibe..." required>
-        <button type="submit">Gerar músicas</button>
-    </form>
+    <h1>🎧 Moodify</h1>
 
-    <ul>
-        {% for musica in musicas %}
-            <li>{{ musica }}</li>
-        {% endfor %}
-    </ul>
+    <div class="search-box">
+        <input type="text" id="mood" placeholder="Digite seu mood (calma, feliz, triste...)">
+        <button class="buscar-btn" onclick="buscar()">Buscar</button>
+    </div>
+
+    <div id="resultados"></div>
+
+<script>
+function buscar() {
+    let mood = document.getElementById("mood").value;
+    let div = document.getElementById("resultados");
+
+    if (mood.trim() === "") {
+        alert("Digite um mood primeiro 😅");
+        return;
+    }
+
+    div.innerHTML = "<div class='loading'>🔎 Buscando músicas...</div>";
+
+    fetch("/gerar", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({mood: mood})
+    })
+    .then(res => res.json())
+    .then(data => {
+        div.innerHTML = "";
+
+        if (data.length === 0) {
+            div.innerHTML = "<p>Nenhuma música encontrada 😢</p>";
+            return;
+        }
+
+        data.forEach(m => {
+            div.innerHTML += `
+                <div class="card">
+                    <img src="${m.capa}">
+                    <h3>${m.titulo}</h3>
+                    <p>${m.artista}</p>
+                    <button class="like" onclick="curtir('${m.titulo}')">❤️ Curtir</button>
+                </div>
+            `;
+        });
+    })
+    .catch(error => {
+        div.innerHTML = "<p>Erro ao buscar músicas 😢</p>";
+    });
+}
+
+function curtir(musica) {
+    fetch("/curtir", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({musica: musica})
+    })
+    .then(() => {
+        alert("Música curtida! ❤️");
+    });
+}
+</script>
 
 </body>
 </html>
