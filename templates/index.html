@@ -1,174 +1,253 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Moodify</title>
+<meta charset="UTF-8">
+<title>Moodify</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1e1e2f, #121212);
-            color: white;
-            text-align: center;
-        }
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#1e1e2f,#121212);
+    color:white;
+    text-align:center;
+}
 
-        h1 {
-            margin-top: 40px;
-            font-size: 38px;
-        }
+/* HEADER */
+h1{
+    margin-top:40px;
+    font-size:38px;
+}
 
-        .search-box {
-            margin: 30px 0;
-        }
+/* SEARCH */
+.search-box{
+    margin:30px 0;
+}
 
-        input {
-            padding: 12px;
-            width: 280px;
-            border-radius: 25px;
-            border: none;
-            outline: none;
-            font-size: 15px;
-        }
+input{
+    padding:12px;
+    width:280px;
+    border-radius:25px;
+    border:none;
+    outline:none;
+    font-size:15px;
+}
 
-        button {
-            padding: 12px 18px;
-            border-radius: 25px;
-            border: none;
-            cursor: pointer;
-            margin-left: 8px;
-            font-weight: bold;
-            transition: transform 0.2s ease;
-        }
+button{
+    padding:12px 18px;
+    border-radius:25px;
+    border:none;
+    cursor:pointer;
+    margin-left:8px;
+    font-weight:bold;
+    transition:0.2s;
+}
 
-        button:hover {
-            transform: scale(1.05);
-        }
+button:hover{
+    transform:scale(1.05);
+}
 
-        .buscar-btn {
-            background: #4CAF50;
-            color: white;
-        }
+.buscar-btn{
+    background:#4CAF50;
+    color:white;
+}
 
-        .like {
-            margin-top: 10px;
-            background: #ff4081;
-            color: white;
-            width: 100%;
-        }
+.like{
+    margin-top:10px;
+    background:#ff4081;
+    color:white;
+    width:100%;
+}
 
-        #resultados {
-            margin-top: 30px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding-bottom: 40px;
-        }
+/* DONATE BUTTON */
+.donate-btn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#ff9800;
+    color:white;
+    box-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
 
-        .card {
-            background: rgba(255,255,255,0.07);
-            padding: 15px;
-            margin: 12px;
-            border-radius: 18px;
-            width: 220px;
-            transition: transform 0.3s ease;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-        }
+/* CARDS */
+#resultados{
+    margin-top:30px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    padding-bottom:60px;
+}
 
-        .card:hover {
-            transform: scale(1.05);
-        }
+.card{
+    background:rgba(255,255,255,0.07);
+    padding:15px;
+    margin:12px;
+    border-radius:18px;
+    width:220px;
+    transition:0.3s;
+    box-shadow:0 6px 15px rgba(0,0,0,0.4);
+}
 
-        img {
-            width: 100%;
-            border-radius: 12px;
-        }
+.card:hover{
+    transform:scale(1.05);
+}
 
-        .loading {
-            font-size: 18px;
-            animation: pulse 1.2s infinite;
-        }
+img{
+    width:100%;
+    border-radius:12px;
+}
 
-        @keyframes pulse {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
-        }
+.loading{
+    font-size:18px;
+    animation:pulse 1.2s infinite;
+}
 
-        @media (max-width: 600px) {
-            .card {
-                width: 90%;
-            }
+@keyframes pulse{
+    0%{opacity:0.4;}
+    50%{opacity:1;}
+    100%{opacity:0.4;}
+}
 
-            input {
-                width: 200px;
-            }
-        }
-    </style>
+/* MODAL */
+.modal{
+    display:none;
+    position:fixed;
+    z-index:999;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content{
+    background:#1f1f2e;
+    padding:25px;
+    border-radius:15px;
+    width:320px;
+    text-align:center;
+}
+
+.close{
+    cursor:pointer;
+    color:#aaa;
+    float:right;
+    font-size:18px;
+}
+
+.close:hover{
+    color:white;
+}
+
+@media(max-width:600px){
+    .card{width:90%;}
+    input{width:200px;}
+}
+</style>
 </head>
 
 <body>
 
-    <h1>🎧 Moodify</h1>
+<h1>🎧 Moodify</h1>
 
-    <div class="search-box">
-        <input type="text" id="mood" placeholder="Digite seu mood (indie, calma, feliz...)">
-        <button class="buscar-btn" onclick="buscar()">Buscar</button>
-    </div>
+<div class="search-box">
+<input type="text" id="mood" placeholder="Digite seu mood...">
+<button class="buscar-btn" onclick="buscar()">Buscar</button>
+</div>
 
-    <div id="resultados"></div>
+<div id="resultados"></div>
+
+<!-- DONATE BUTTON -->
+<button class="donate-btn" onclick="abrirDonate()">💖 Donate</button>
+
+<!-- DONATE MODAL -->
+<div id="donateModal" class="modal">
+<div class="modal-content">
+<span class="close" onclick="fecharDonate()">X</span>
+<h2>💖 Apoie o Moodify</h2>
+<p>
+O donate ajuda a manter o servidor online,
+melhorar a IA de recomendações e adicionar
+novas funcionalidades.
+</p>
+<p>Seu apoio mantém o projeto vivo 🚀</p>
+</div>
+</div>
+
+<!-- UPDATE MODAL -->
+<div id="updateModal" class="modal">
+<div class="modal-content">
+<span class="close" onclick="fecharUpdate()">X</span>
+<h2>🚀 Moodify Atualizado!</h2>
+<p>Nova atualização trouxe:</p>
+<ul style="text-align:left;">
+<li>✔ IA mais inteligente</li>
+<li>✔ Até 30 músicas por busca</li>
+<li>✔ Melhor performance</li>
+<li>✔ Correção de travamentos</li>
+</ul>
+<p>Aproveite 🎶🔥</p>
+</div>
+</div>
 
 <script>
-function buscar() {
-    let mood = document.getElementById("mood").value;
-    let div = document.getElementById("resultados");
+function buscar(){
+    let mood=document.getElementById("mood").value;
+    let div=document.getElementById("resultados");
 
-    if (mood.trim() === "") {
-        alert("Digite um mood primeiro 😅");
+    if(mood.trim()===""){
+        alert("Digite um mood 😅");
         return;
     }
 
-    div.innerHTML = "<div class='loading'>🔎 Buscando músicas...</div>";
+    div.innerHTML="<div class='loading'>🔎 Buscando músicas...</div>";
 
-    fetch("/gerar", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({mood: mood})
+    fetch("/gerar",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({mood:mood})
     })
-    .then(res => res.json())
-    .then(data => {
-        div.innerHTML = "";
-
-        if (data.length === 0) {
-            div.innerHTML = "<p>Nenhuma música encontrada 😢</p>";
-            return;
-        }
-
-        data.forEach(m => {
-            div.innerHTML += `
-                <div class="card">
-                    <img src="${m.capa}" loading="lazy">
-                    <h3>${m.titulo}</h3>
-                    <p>${m.artista}</p>
-                    <button class="like" onclick="curtir('${m.titulo.replace(/'/g, "\\'")}')">❤️ Curtir</button>
-                </div>
-            `;
+    .then(res=>res.json())
+    .then(data=>{
+        div.innerHTML="";
+        data.forEach(m=>{
+            div.innerHTML+=`
+            <div class="card">
+                <img src="${m.capa}" loading="lazy">
+                <h3>${m.titulo}</h3>
+                <p>${m.artista}</p>
+                <button class="like" onclick="curtir('${m.titulo.replace(/'/g,"\\'")}')">❤️ Curtir</button>
+            </div>`;
         });
-    })
-    .catch(() => {
-        div.innerHTML = "<p>Erro ao buscar músicas 😢</p>";
     });
 }
 
-function curtir(musica) {
-    fetch("/curtir", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({musica: musica})
-    })
-    .then(() => {
-        alert("Música curtida! ❤️");
+function curtir(musica){
+    fetch("/curtir",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({musica:musica})
     });
+}
+
+/* DONATE */
+function abrirDonate(){
+    document.getElementById("donateModal").style.display="flex";
+}
+
+function fecharDonate(){
+    document.getElementById("donateModal").style.display="none";
+}
+
+/* UPDATE MESSAGE (mostra ao entrar) */
+window.onload=function(){
+    document.getElementById("updateModal").style.display="flex";
+};
+
+function fecharUpdate(){
+    document.getElementById("updateModal").style.display="none";
 }
 </script>
 

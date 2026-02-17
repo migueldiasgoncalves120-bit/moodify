@@ -5,8 +5,29 @@ import os
 
 app = Flask(__name__)
 
-# 🔥 SUA API DO DEEZER (usando busca pública)
 DEEZER_API = "https://api.deezer.com/search?q="
+
+
+# =========================
+# FUNÇÃO INTELIGENTE DE MOOD
+# =========================
+def interpretar_mood(texto):
+    texto = texto.lower()
+
+    if "dormir" in texto or "sono" in texto:
+        return "sleep chill instrumental"
+    elif "triste" in texto:
+        return "sad acoustic"
+    elif "feliz" in texto:
+        return "happy pop"
+    elif "treino" in texto or "academia" in texto:
+        return "workout electronic"
+    elif "calma" in texto:
+        return "relax lo-fi"
+    elif "indie" in texto:
+        return "indie alternative"
+    else:
+        return texto  # se não reconhecer, usa o texto normal
 
 
 # =========================
@@ -15,27 +36,39 @@ DEEZER_API = "https://api.deezer.com/search?q="
 @app.route("/gerar", methods=["POST"])
 def gerar():
     data = request.get_json()
-    mood = data.get("mood", "")
+    mood_input = data.get("mood", "")
 
-    if not mood:
+    if not mood_input:
         return jsonify([])
+
+    mood = interpretar_mood(mood_input)
 
     try:
         response = requests.get(DEEZER_API + mood)
         dados = response.json()
-
-        musicas = []
         resultados = dados.get("data", [])
 
-        # Embaralha para evitar repetir sempre as mesmas
         random.shuffle(resultados)
 
-        for musica in resultados[:10]:  # Limita a 10 músicas
+        musicas = []
+        usadas = set()
+
+        for musica in resultados:
+            titulo = musica["title"]
+
+            if titulo in usadas:
+                continue
+
+            usadas.add(titulo)
+
             musicas.append({
-                "titulo": musica["title"],
+                "titulo": titulo,
                 "artista": musica["artist"]["name"],
                 "capa": musica["album"]["cover_medium"]
             })
+
+            if len(musicas) == 30:
+                break
 
         return jsonify(musicas)
 
@@ -45,7 +78,7 @@ def gerar():
 
 
 # =========================
-# CURTIR MÚSICA
+# CURTIR
 # =========================
 @app.route("/curtir", methods=["POST"])
 def curtir():
@@ -66,7 +99,7 @@ def home():
 
 
 # =========================
-# RODAR APP (RENDER + LOCAL)
+# RENDER + LOCALHOST
 # =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
