@@ -2,153 +2,236 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Moodify</title>
 
 <style>
 body{
     margin:0;
     font-family:Arial, sans-serif;
-    background:linear-gradient(135deg,#1e1e2f,#121212);
     color:white;
     text-align:center;
+    overflow-x:hidden;
+    background:linear-gradient(135deg,#1e1e2f,#121212);
+    transition:background 1s ease;
+}
+
+/* FUNDO ANIMADO */
+body::before{
+    content:"";
+    position:fixed;
+    width:200%;
+    height:200%;
+    top:-50%;
+    left:-50%;
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.04),transparent 40%);
+    animation:bgMove 30s linear infinite;
+    z-index:-1;
+}
+@keyframes bgMove{
+    0%{transform:translate(0,0);}
+    50%{transform:translate(-8%,-8%);}
+    100%{transform:translate(0,0);}
+}
+
+/* MENU */
+.menu-btn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    font-size:28px;
+    cursor:pointer;
+    z-index:1002;
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    right:-260px;
+    width:250px;
+    height:100%;
+    background:#111;
+    padding-top:70px;
+    transition:right 0.4s ease;
+    z-index:1003;
+}
+
+.sidebar.active{ right:0; }
+
+.sidebar button{
+    width:85%;
+    padding:12px;
+    margin:15px auto;
+    display:block;
+    border:none;
+    border-radius:10px;
+    background:#2196f3;
+    color:white;
+    cursor:pointer;
+    transition:all 0.3s ease;
+}
+
+.sidebar button:hover{
+    background:#42a5f5;
+    transform:scale(1.05);
+}
+
+.overlay{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    top:0;
+    left:0;
+    opacity:0;
+    pointer-events:none;
+    transition:0.3s;
+    z-index:1001;
+}
+.overlay.active{
+    opacity:1;
+    pointer-events:all;
 }
 
 /* HEADER */
-h1{
-    margin-top:40px;
-    font-size:38px;
-}
+h1{margin-top:70px;font-size:34px;}
 
 /* SEARCH */
-.search-box{
-    margin:30px 0;
-}
+.search-box{margin:30px 0;padding:0 15px;}
 
 input{
     padding:12px;
     width:280px;
+    max-width:90%;
     border-radius:25px;
     border:none;
-    outline:none;
-    font-size:15px;
+    transition:0.3s;
 }
 
-button{
-    padding:12px 18px;
-    border-radius:25px;
-    border:none;
-    cursor:pointer;
-    margin-left:8px;
-    font-weight:bold;
-    transition:0.2s;
-}
-
-button:hover{
-    transform:scale(1.05);
+input:focus{
+    box-shadow:0 0 15px rgba(0,255,255,0.5);
 }
 
 .buscar-btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:25px;
     background:#4CAF50;
     color:white;
+    cursor:pointer;
+    transition:all 0.3s ease;
 }
 
-.like{
-    margin-top:10px;
-    background:#ff4081;
-    color:white;
-    width:100%;
+.buscar-btn:hover{
+    background:#66bb6a;
+    transform:scale(1.08);
+    box-shadow:0 0 15px rgba(76,175,80,0.7);
 }
 
-/* DONATE BUTTON */
-.donate-btn{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:#ff9800;
-    color:white;
-    box-shadow:0 5px 15px rgba(0,0,0,0.4);
-}
+/* SEÇÕES */
+.section{display:none;padding:0 10px;}
+.section.active{display:block;}
 
 /* CARDS */
 #resultados{
-    margin-top:30px;
     display:flex;
     flex-wrap:wrap;
     justify-content:center;
-    padding-bottom:60px;
 }
 
 .card{
-    background:rgba(255,255,255,0.07);
-    padding:15px;
-    margin:12px;
-    border-radius:18px;
+    background:rgba(255,255,255,0.08);
     width:220px;
-    transition:0.3s;
-    box-shadow:0 6px 15px rgba(0,0,0,0.4);
+    margin:10px;
+    padding:12px;
+    border-radius:15px;
+    opacity:0;
+    transform:translateY(20px);
+    animation:fadeUp 0.5s ease forwards;
+    transition:transform 0.3s ease;
 }
 
 .card:hover{
+    transform:translateY(-5px) scale(1.03);
+}
+
+.card img{
+    width:100%;
+    border-radius:10px;
+}
+
+@keyframes fadeUp{
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.youtube-btn{
+    background:#ff0000;
+    color:white;
+    border:none;
+    padding:8px;
+    border-radius:8px;
+    width:100%;
+    margin-top:5px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+}
+
+.youtube-btn:hover{
+    background:#ff4444;
     transform:scale(1.05);
 }
 
-img{
-    width:100%;
-    border-radius:12px;
-}
-
-.loading{
-    font-size:18px;
-    animation:pulse 1.2s infinite;
-}
-
-@keyframes pulse{
-    0%{opacity:0.4;}
-    50%{opacity:1;}
-    100%{opacity:0.4;}
-}
-
-/* MODAL */
-.modal{
-    display:none;
-    position:fixed;
-    z-index:999;
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.7);
-    justify-content:center;
-    align-items:center;
-}
-
-.modal-content{
-    background:#1f1f2e;
-    padding:25px;
-    border-radius:15px;
-    width:320px;
-    text-align:center;
-}
-
-.close{
-    cursor:pointer;
-    color:#aaa;
-    float:right;
-    font-size:18px;
-}
-
-.close:hover{
+.like-btn{
+    background:#ff4081;
     color:white;
+    border:none;
+    padding:8px;
+    border-radius:8px;
+    width:100%;
+    margin-top:5px;
+    cursor:pointer;
+    transition:all 0.3s ease;
 }
 
-@media(max-width:600px){
+.like-btn:hover{
+    background:#ff79a8;
+    transform:scale(1.05);
+}
+
+/* LOADING */
+.loading{
+    width:60px;
+    height:60px;
+    border:6px solid rgba(255,255,255,0.2);
+    border-top:6px solid white;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:40px auto;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* MOBILE */
+@media (max-width:768px){
     .card{width:90%;}
-    input{width:200px;}
+    .sidebar{width:80%;right:-100%;}
+    .sidebar.active{right:0;}
 }
 </style>
 </head>
 
 <body>
+
+<div class="menu-btn" onclick="toggleMenu()">⋮</div>
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<div class="sidebar">
+    <button onclick="abrirAba('musicas')">🎵 Músicas</button>
+    <button onclick="abrirAba('favoritas')">⭐ Favoritas</button>
+    <button onclick="abrirAba('historico')">📜 Histórico</button>
+</div>
 
 <h1>🎧 Moodify</h1>
 
@@ -157,52 +240,57 @@ img{
 <button class="buscar-btn" onclick="buscar()">Buscar</button>
 </div>
 
+<div id="musicas" class="section active">
 <div id="resultados"></div>
-
-<!-- DONATE BUTTON -->
-<button class="donate-btn" onclick="abrirDonate()">💖 Donate</button>
-
-<!-- DONATE MODAL -->
-<div id="donateModal" class="modal">
-<div class="modal-content">
-<span class="close" onclick="fecharDonate()">X</span>
-<h2>💖 Apoie o Moodify</h2>
-<p>
-O donate ajuda a manter o servidor online,
-melhorar a IA de recomendações e adicionar
-novas funcionalidades.
-</p>
-<p>Seu apoio mantém o projeto vivo 🚀</p>
-</div>
 </div>
 
-<!-- UPDATE MODAL -->
-<div id="updateModal" class="modal">
-<div class="modal-content">
-<span class="close" onclick="fecharUpdate()">X</span>
-<h2>🚀 Moodify Atualizado!</h2>
-<p>Nova atualização trouxe:</p>
-<ul style="text-align:left;">
-<li>✔ IA mais inteligente</li>
-<li>✔ Até 30 músicas por busca</li>
-<li>✔ Melhor performance</li>
-<li>✔ Correção de travamentos</li>
-</ul>
-<p>Aproveite 🎶🔥</p>
-</div>
-</div>
+<div id="favoritas" class="section"></div>
+<div id="historico" class="section"></div>
 
 <script>
-function buscar(){
-    let mood=document.getElementById("mood").value;
-    let div=document.getElementById("resultados");
 
-    if(mood.trim()===""){
-        alert("Digite um mood 😅");
-        return;
+function toggleMenu(){
+    document.querySelector(".sidebar").classList.toggle("active");
+    document.querySelector(".overlay").classList.toggle("active");
+}
+
+function abrirAba(id){
+    document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+
+    // FECHA MENU APENAS SE ESTIVER ABERTO
+    if(document.querySelector(".sidebar").classList.contains("active")){
+        toggleMenu();
     }
 
-    div.innerHTML="<div class='loading'>🔎 Buscando músicas...</div>";
+    if(id==="favoritas") carregarFavoritas();
+    if(id==="historico") carregarHistorico();
+}
+
+function aplicarTema(mood){
+    mood=mood.toLowerCase();
+
+    if(mood.includes("feliz"))
+        document.body.style.background="linear-gradient(135deg,#ff9800,#ff4081)";
+    else if(mood.includes("triste"))
+        document.body.style.background="linear-gradient(135deg,#2c3e50,#000)";
+    else if(mood.includes("chill") || mood.includes("calma"))
+        document.body.style.background="linear-gradient(135deg,#2196f3,#0d47a1)";
+    else if(mood.includes("treino") || mood.includes("academia"))
+        document.body.style.background="linear-gradient(135deg,#ff0000,#000)";
+    else
+        document.body.style.background="linear-gradient(135deg,#1e1e2f,#121212)";
+}
+
+function buscar(){
+    let mood=document.getElementById("mood").value;
+    if(!mood) return alert("Digite um mood");
+
+    aplicarTema(mood);
+    abrirAba("musicas");
+
+    let div=document.getElementById("resultados");
+    div.innerHTML="<div class='loading'></div>";
 
     fetch("/gerar",{
         method:"POST",
@@ -212,44 +300,44 @@ function buscar(){
     .then(res=>res.json())
     .then(data=>{
         div.innerHTML="";
-        data.forEach(m=>{
+        data.forEach((m,index)=>{
             div.innerHTML+=`
-            <div class="card">
-                <img src="${m.capa}" loading="lazy">
+            <div class="card" style="animation-delay:${index*0.05}s">
+                <img src="${m.capa}">
                 <h3>${m.titulo}</h3>
                 <p>${m.artista}</p>
-                <button class="like" onclick="curtir('${m.titulo.replace(/'/g,"\\'")}')">❤️ Curtir</button>
-            </div>`;
+                <button class="youtube-btn" onclick="window.open('https://youtube.com/watch?v=${m.videoId}','_blank')">▶ Abrir</button>
+                <button class="like-btn" onclick='curtir(${JSON.stringify(m)})'>❤️ Curtir</button>
+            </div>
+            `;
         });
     });
 }
 
-function curtir(musica){
-    fetch("/curtir",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({musica:musica})
+function curtir(m){
+    let favs=JSON.parse(localStorage.getItem("favoritas"))||[];
+    favs.push(m);
+    localStorage.setItem("favoritas",JSON.stringify(favs));
+}
+
+function carregarFavoritas(){
+    let favs=JSON.parse(localStorage.getItem("favoritas"))||[];
+    let div=document.getElementById("favoritas");
+    div.innerHTML="<h2>⭐ Favoritas</h2>";
+    favs.forEach(m=>{
+        div.innerHTML+=`<div>${m.titulo} - ${m.artista}</div>`;
     });
 }
 
-/* DONATE */
-function abrirDonate(){
-    document.getElementById("donateModal").style.display="flex";
+function carregarHistorico(){
+    let hist=JSON.parse(localStorage.getItem("historico"))||[];
+    let div=document.getElementById("historico");
+    div.innerHTML="<h2>📜 Histórico</h2>";
+    hist.forEach(m=>{
+        div.innerHTML+=`<div>${m}</div>`;
+    });
 }
 
-function fecharDonate(){
-    document.getElementById("donateModal").style.display="none";
-}
-
-/* UPDATE MESSAGE (mostra ao entrar) */
-window.onload=function(){
-    document.getElementById("updateModal").style.display="flex";
-};
-
-function fecharUpdate(){
-    document.getElementById("updateModal").style.display="none";
-}
 </script>
-
 </body>
 </html>

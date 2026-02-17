@@ -4,13 +4,10 @@ import random
 import os
 
 app = Flask(__name__)
-
-# Inicializa YTMusic (modo público)
 ytmusic = YTMusic()
 
-
 # =========================
-# INTERPRETADOR DE MOOD
+# INTERPRETAR MOOD
 # =========================
 def interpretar_mood(texto):
     texto = texto.lower()
@@ -46,7 +43,6 @@ def gerar():
 
     try:
         resultados = ytmusic.search(mood, filter="songs")
-
         random.shuffle(resultados)
 
         musicas = []
@@ -54,17 +50,18 @@ def gerar():
         for musica in resultados[:30]:
             titulo = musica.get("title")
             artistas = musica.get("artists", [])
-
             artista_nome = artistas[0]["name"] if artistas else "Desconhecido"
 
-            # Thumbnail maior
             thumbnails = musica.get("thumbnails", [])
             capa = thumbnails[-1]["url"] if thumbnails else ""
+
+            video_id = musica.get("videoId")
 
             musicas.append({
                 "titulo": titulo,
                 "artista": artista_nome,
-                "capa": capa
+                "capa": capa,
+                "videoId": video_id
             })
 
         return jsonify(musicas)
@@ -94,7 +91,7 @@ def home():
 
 
 # =========================
-# RENDER + LOCALHOST
+# START
 # =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
