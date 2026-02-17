@@ -15,7 +15,7 @@
 
         h1 {
             margin-top: 40px;
-            font-size: 40px;
+            font-size: 38px;
         }
 
         .search-box {
@@ -25,7 +25,7 @@
         input {
             padding: 12px;
             width: 280px;
-            border-radius: 20px;
+            border-radius: 25px;
             border: none;
             outline: none;
             font-size: 15px;
@@ -33,12 +33,12 @@
 
         button {
             padding: 12px 18px;
-            border-radius: 20px;
+            border-radius: 25px;
             border: none;
             cursor: pointer;
             margin-left: 8px;
             font-weight: bold;
-            transition: 0.3s;
+            transition: transform 0.2s ease;
         }
 
         button:hover {
@@ -62,38 +62,47 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            padding-bottom: 40px;
         }
 
         .card {
-            backdrop-filter: blur(12px);
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.07);
             padding: 15px;
             margin: 12px;
-            border-radius: 20px;
+            border-radius: 18px;
             width: 220px;
-            transition: 0.3s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
         }
 
         .card:hover {
             transform: scale(1.05);
-            background: rgba(255,255,255,0.12);
         }
 
         img {
             width: 100%;
-            border-radius: 15px;
+            border-radius: 12px;
         }
 
         .loading {
             font-size: 18px;
-            animation: pulse 1s infinite;
+            animation: pulse 1.2s infinite;
         }
 
         @keyframes pulse {
             0% { opacity: 0.4; }
             50% { opacity: 1; }
             100% { opacity: 0.4; }
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                width: 90%;
+            }
+
+            input {
+                width: 200px;
+            }
         }
     </style>
 </head>
@@ -103,7 +112,7 @@
     <h1>🎧 Moodify</h1>
 
     <div class="search-box">
-        <input type="text" id="mood" placeholder="Digite seu mood (calma, feliz, triste...)">
+        <input type="text" id="mood" placeholder="Digite seu mood (indie, calma, feliz...)">
         <button class="buscar-btn" onclick="buscar()">Buscar</button>
     </div>
 
@@ -138,15 +147,15 @@ function buscar() {
         data.forEach(m => {
             div.innerHTML += `
                 <div class="card">
-                    <img src="${m.capa}">
+                    <img src="${m.capa}" loading="lazy">
                     <h3>${m.titulo}</h3>
                     <p>${m.artista}</p>
-                    <button class="like" onclick="curtir('${m.titulo}')">❤️ Curtir</button>
+                    <button class="like" onclick="curtir('${m.titulo.replace(/'/g, "\\'")}')">❤️ Curtir</button>
                 </div>
             `;
         });
     })
-    .catch(error => {
+    .catch(() => {
         div.innerHTML = "<p>Erro ao buscar músicas 😢</p>";
     });
 }

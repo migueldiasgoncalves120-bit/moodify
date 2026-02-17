@@ -1,97 +1,73 @@
 from flask import Flask, render_template, request, jsonify
-import sqlite3
-from moodify_v2 import gerar_musicas
+import requests
+import random
 import os
-PORT = int(os.environ.get('PORT', 5000))
-app.run(host='0.0.0.0', port=PORT)
 
 app = Flask(__name__)
 
-# ------------------------
-# BANCO DE DADOS
-# ------------------------
+# 🔥 SUA API DO DEEZER (usando busca pública)
+DEEZER_API = "https://api.deezer.com/search?q="
 
-def init_db():
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS historico (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            mood TEXT
-        )
-    """)
+# =========================
+# GERAR MÚSICAS
+# =========================
+@app.route("/gerar", methods=["POST"])
+def gerar():
+    data = request.get_json()
+    mood = data.get("mood", "")
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS curtidas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            musica TEXT
-        )
-    """)
+    if not mood:
+        return jsonify([])
 
-    conn.commit()
-    conn.close()
+    try:
+        response = requests.get(DEEZER_API + mood)
+        dados = response.json()
 
-init_db()
+        musicas = []
+        resultados = dados.get("data", [])
 
-# ------------------------
-# ROTA PRINCIPAL
-# ------------------------
+        # Embaralha para evitar repetir sempre as mesmas
+        random.shuffle(resultados)
 
+        for musica in resultados[:10]:  # Limita a 10 músicas
+            musicas.append({
+                "titulo": musica["title"],
+                "artista": musica["artist"]["name"],
+                "capa": musica["album"]["cover_medium"]
+            })
+
+        return jsonify(musicas)
+
+    except Exception as e:
+        print("Erro:", e)
+        return jsonify([])
+
+
+# =========================
+# CURTIR MÚSICA
+# =========================
+@app.route("/curtir", methods=["POST"])
+def curtir():
+    data = request.get_json()
+    musica = data.get("musica")
+
+    print(f"Música curtida: {musica}")
+
+    return jsonify({"status": "ok"})
+
+
+# =========================
+# HOME
+# =========================
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# ------------------------
-# GERAR MÚSICAS
-# ------------------------
 
-@app.route("/gerar", methods=["POST"])
-def gerar():
-    mood = request.json["mood"]
-
-    # salva no histórico
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO historico (mood) VALUES (?)", (mood,))
-    conn.commit()
-    conn.close()
-
-    musicas = gerar_musicas(mood)
-
-    return jsonify(musicas)
-
-# ------------------------
-# CURTIR MÚSICA
-# ------------------------
-
-@app.route("/curtir", methods=["POST"])
-def curtir():
-    musica = request.json["musica"]
-
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO curtidas (musica) VALUES (?)", (musica,))
-    conn.commit()
-    conn.close()
-
-    return jsonify({"status": "ok"})
-
-# ------------------------
-# VER HISTÓRICO
-# ------------------------
-
-@app.route("/historico")
-def historico():
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT mood FROM historico ORDER BY id DESC LIMIT 5")
-    dados = cursor.fetchall()
-    conn.close()
-
-    return jsonify(dados)
-
-# ------------------------
-
+# =========================
+# RODAR APP (RENDER + LOCAL)
+# =========================
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
