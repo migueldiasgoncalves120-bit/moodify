@@ -1,33 +1,34 @@
 from flask import Flask, render_template, request, jsonify
-import requests
+from ytmusicapi import YTMusic
 import random
 import os
 
 app = Flask(__name__)
 
-DEEZER_API = "https://api.deezer.com/search?q="
+# Inicializa YTMusic (modo público)
+ytmusic = YTMusic()
 
 
 # =========================
-# FUNÇÃO INTELIGENTE DE MOOD
+# INTERPRETADOR DE MOOD
 # =========================
 def interpretar_mood(texto):
     texto = texto.lower()
 
     if "dormir" in texto or "sono" in texto:
-        return "sleep chill instrumental"
+        return "sleep chill relaxing music"
     elif "triste" in texto:
-        return "sad acoustic"
+        return "sad emotional songs"
     elif "feliz" in texto:
-        return "happy pop"
+        return "happy upbeat songs"
     elif "treino" in texto or "academia" in texto:
-        return "workout electronic"
+        return "workout gym music"
     elif "calma" in texto:
-        return "relax lo-fi"
+        return "relax lo-fi chill"
     elif "indie" in texto:
-        return "indie alternative"
+        return "indie alternative hits"
     else:
-        return texto  # se não reconhecer, usa o texto normal
+        return texto
 
 
 # =========================
@@ -44,31 +45,27 @@ def gerar():
     mood = interpretar_mood(mood_input)
 
     try:
-        response = requests.get(DEEZER_API + mood)
-        dados = response.json()
-        resultados = dados.get("data", [])
+        resultados = ytmusic.search(mood, filter="songs")
 
         random.shuffle(resultados)
 
         musicas = []
-        usadas = set()
 
-        for musica in resultados:
-            titulo = musica["title"]
+        for musica in resultados[:30]:
+            titulo = musica.get("title")
+            artistas = musica.get("artists", [])
 
-            if titulo in usadas:
-                continue
+            artista_nome = artistas[0]["name"] if artistas else "Desconhecido"
 
-            usadas.add(titulo)
+            # Thumbnail maior
+            thumbnails = musica.get("thumbnails", [])
+            capa = thumbnails[-1]["url"] if thumbnails else ""
 
             musicas.append({
                 "titulo": titulo,
-                "artista": musica["artist"]["name"],
-                "capa": musica["album"]["cover_medium"]
+                "artista": artista_nome,
+                "capa": capa
             })
-
-            if len(musicas) == 30:
-                break
 
         return jsonify(musicas)
 
@@ -84,9 +81,7 @@ def gerar():
 def curtir():
     data = request.get_json()
     musica = data.get("musica")
-
     print(f"Música curtida: {musica}")
-
     return jsonify({"status": "ok"})
 
 
